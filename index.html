@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TV Chart GRID: BTUSD</title>
+
+    <meta name="authors" content="yerbkhan, ▲ Pyramid">
+    <meta name="version" content="2">
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <style>
+        body, html {
+			padding: 0;
+			margin: 0;
+			font-family: 'fontawesome', Calibri, Arial, sans-serif;
+			color: #666;
+			background: #111;
+			min-height: 800px;
+		}
+
+		/* Reset */
+		*,
+		*:after,
+		*:before {
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+		a {
+			color: #ccc;
+			text-decoration: none;
+		}
+
+		a:hover {
+			color: #fff;
+		}
+		
+		#indicator-switcher {
+			
+		}
+
+		.pair{
+			color: #369ce2;
+			font-weight: 600;
+			font-size: 16px;
+			z-index: 999;
+			margin-left: 5px;
+			position: relative;
+			top: 2px;
+		}
+
+
+		/* GRID LAYOUT */
+
+		.grid {
+			width: 100%;
+			z-index: 100;
+
+		}
+		.module {
+			color: #666;
+			background-color: #222;
+			float: left;
+			width: 33.22%;
+			height: 33.22vh;
+		}
+		.module2 {
+			color: #666;
+			background-color: #222;
+			float: left;
+			width: 50%;
+			height: 50vh;
+		}
+		.symbol{
+			display: none;
+			position: fixed;
+			float: left;
+			background: rgba(0,0,0,1);
+			z-index: 1000;
+		}
+		/* Header CSS */
+		
+		.header{
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			z-index: 10;
+		}
+		.menus {
+			float: left;
+			background:rgba(0,0,0,.8);
+			padding: 0px;
+		}
+		
+		/* Menus CSS */
+		select {
+			background: #111;
+			color:#999;
+			border:none;
+			outline:none;
+		}
+		
+		optgroup {
+			background: #111;
+			color:#999;
+			border:none;
+			outline:none;
+		}
+		
+	</style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="menus">
+            <select id="ticker-switcher" style="margin-bottom: 2px;">
+                <option value="BTCUSD">BTCUSD</option>
+                <optgroup label="ALTUSD">
+                    <option value="EOSUSD">EOSUSD</option>
+                    <option value="ETHUSD">ETHUSD</option>
+                    <option value="IOTUSD">IOTUSD</option>
+                    <option value="XRPUSD">XRPUSD</option>
+                    <option value="BCHUSD">BCHUSD</option>
+                    <option value="NEOUSD">NEOUSD</option>
+                    <option value="ETCUSD">ETCUSD</option>
+                    <option value="XMRUSD">XMRUSD</option>
+                    <option value="LTCUSD">LTCUSD</option>
+                    <option value="DSHUSD">DSHUSD</option>
+                    <option value="ZECUSD">ZECUSD</option>
+                    <option value="ETPUSD">ETPUSD</option>
+                    <option value="TRXUSD">TRXUSD</option>
+                    <option value="QTMUSD">QTMUSD</option>
+                </optgroup>
+                <optgroup label="ALTBTC">
+                    <option value="ETHBTC">ETHBTC</option>
+                    <option value="EOSBTC">EOSBTC</option>
+                    <option value="IOTBTC">IOTBTC</option>
+                    <option value="XMRBTC">XMRBTC</option>
+                    <option value="BCHBTC">BCHBTC</option>
+                    <option value="NEOBTC">NEOBTC</option>
+                    <option value="XRPBTC">XRPBTC</option>
+                    <option value="DSHBTC">DSHBTC</option>
+                    <option value="ZECBTC">ZECBTC</option>
+                    <option value="LTCBTC">LTCBTC</option>
+                    <option value="ETCBTC">ETCBTC</option>
+                    <option value="ETPBTC">ETPBTC</option>
+                    <option value="TRXBTC">TRXBTC</option>
+                </optgroup>
+            </select>
+            <select id="studies-switcher" style="margin-bottom: 2px;">
+                <option value="none">No Indicator</option>
+                <option value="BB@tv-basicstudies">Bollinger Bands</option>
+                <option value="IchimokuCloud@tv-basicstudies">Ichimoku Cloud</option>
+                <option value="MACD@tv-basicstudies">MACD</option>
+                <option value="RSI@tv-basicstudies">RSI</option>
+                <option value="Stochastic@tv-basicstudies">Stochastic</option>
+                <option value="StochasticRSI@tv-basicstudies">StochasticRSI</option>
+                <option value="VWAP@tv-basicstudies">VWAP</option>
+                <option value="WilliamR@tv-basicstudies">William %R</option>
+            </select>
+            <label class="pair">BITFINEX: <span class="pair-ticker">BTCUSD</span></label>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <!-- GRID contents BEGIN -->
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "240",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "60",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "5",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "D",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "120",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "15",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "W",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "180",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+            <article class="module">
+                <script type="text/javascript">
+                    function getUrlVars() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                            vars[key] = value;
+                        });
+                        return vars;
+                    }
+                    var $studies = getUrlVars()["studies"];
+                    if (!$studies) {
+                        $studies = 'BB@tv-basicstudies';
+                    }
+                    var $ticker = getUrlVars()["ticker"];
+                    if (!$ticker) {
+                        $ticker = 'BTCUSD';
+                    }
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "BITFINEX:" + $ticker,
+                        "interval": "30",
+                        "timezone": "Etc/UTC",
+                        "theme": "Dark",
+                        "style": "1",
+                        "locale": "en",
+                        "toolbar_bg": "rgba(0, 0, 0, 1)",
+                        "enable_publishing": false,
+                        "hide_top_toolbar": true,
+                        "allow_symbol_change": true,
+                        "save_image": false,
+                        "hideideas": true,
+                        "studies": [
+                            $studies,
+                        ]
+                    });
+                </script>
+            </article>
+        </div> <!-- GRID contents END -->
+    </div>
+
+
+    <script>
+        // get ticker from url parameter
+        function getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+                vars[key] = value;
+            });
+            return vars;
+        }
+        var $studies = getUrlVars()["studies"];
+        if (!$studies) {
+            $studies = 'BB@tv-basicstudies';
+        }
+        var $ticker = getUrlVars()["ticker"];
+        if (!$ticker) {
+            $ticker = 'BTCUSD';
+        }
+
+        //update page title
+        $('title').html($ticker + ' - TV GRID');
+
+        //update page title
+        $('.pair-ticker').html($ticker);
+
+        //update switcher to show correct ticker
+        $('#ticker-switcher').val($ticker);
+
+        //update switcher to show correct ticker
+        $('#studies-switcher').val($studies);
+
+
+        $('#ticker-switcher').change(function() {
+            // get select value
+            $ticker = $(this).val();
+            // refresh page with ticker as url parameter
+            location.href = document.location.protocol + "//" + document.location.hostname + document.location.pathname + "?ticker=" + $ticker + "&studies=" + $studies;
+        });
+
+
+        $('#studies-switcher').change(function() {
+            // get select value
+            $studies = $(this).val();
+            // refresh page with ticker as url parameter
+            location.href = document.location.protocol + "//" + document.location.hostname + document.location.pathname + "?ticker=" + $ticker + "&studies=" + $studies;
+        });
+    </script>
+
+</body>
+
+</html>
