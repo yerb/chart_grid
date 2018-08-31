@@ -1,4 +1,4 @@
-# TV_chart_grid
+# chart_grid
 Grid layout for financial charts
 
 How to use:
